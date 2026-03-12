@@ -61,12 +61,9 @@ if viewer is not None:
 if analysis is not None:
    run, query, plan_box, result_box = layout.analysis_tab(analysis)
    if run and query:
-      plan = data_engine.run_analysis(data_cleaned, query)
-
-      plan_box.write(plan)
-
-      #result_box.write(result)
-      #result_box.markdown("---")
-      #result_box.write(explanation)
-   
+      plan, description = data_engine.run_analysis(data_cleaned, query)
+      
+      description_text = "\n".join(description.values())
+      with plan_box:
+         st.markdown(description_text)
 

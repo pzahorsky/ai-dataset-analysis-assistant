@@ -1,6 +1,7 @@
 from openai import OpenAI
 from dotenv import load_dotenv
 import json
+import streamlit as st
 
 load_dotenv()
 
@@ -73,14 +74,18 @@ def create_analysis_plan(data, query):
     Return explenations strictly inside JSON..
 
     {{
-    "filters": {{}},
-    "group_by": [],
-    "metric": "",
-    "operation": "",
-    "filters_description": "- ",
-    "group_by_description": "- ",
-    "metric_description": "- ",
-    "operation_description": "- "
+    "plan": {{
+        "filters": {{}},
+        "group_by": [],
+        "metric": "",
+        "operation": ""
+    }}
+    "ui_description": {{
+        "filters": "- ",
+        "group_by": "- ",
+        "metric": "- ",
+        "operation": "- "
+        }}
     }}
 
 
@@ -93,6 +98,7 @@ def create_analysis_plan(data, query):
     - Do not invent anything, stick to the dataset columns.
     - Description field should be short bullets strings.
     - Make output usable for both backend and frontend.
+    - The response must start with {{ and end with }}
     """
 
     response = client.responses.create(
@@ -100,22 +106,8 @@ def create_analysis_plan(data, query):
         input=prompt
     )
 
-    return response.output_text
+    response_data = json.loads(response.output_text)
+    plan = response_data.get("plan", {})
+    description = response_data.get("ui_description", {})
 
-def explain_results(raw_result, query):
-    
-    prompt = f"""
-    User query:{query}
-
-    Result:
-    {raw_result}
-
-    Explain the result briefly.
-    """
-
-    response = client.responses.create(
-        model="gpt-5",
-        input=prompt
-    )
-
-    return response.output_text
+    return plan, description
