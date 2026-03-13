@@ -128,4 +128,50 @@ def create_analysis_plan(data, query):
     description = response_data.get("ui_description", {})
     chart = response_data.get("plot", {})
 
-    return plan, description, chart
+    return plan, description, chart, query
+
+def conclude_insights(question, plan, chart, data):
+    
+    data_for_prompt = {
+        "question": question,
+        "analysis_plan": plan,
+        "chart_data": chart,
+        "data": data.head(20).to_dict(orient="records")
+    }
+
+    prompt = f"""
+    
+    You are the Data Analysis creating conclusion.
+
+    Your task is to process the data and create a conclusion from it.
+    
+    Data:
+    {data_for_prompt}
+
+    Data Includes:
+    "question" - given by user
+    "analysis plan" - for processing the data and preparing analysis
+    "chart_data" - used for visualisation of the results
+    "data" - head() of data after cleaning
+
+    Create conclusion from the given sources strictly in JSON format.
+
+    {{
+    "conclusion": ""
+    }}
+
+    Rules:
+    - Do not invent anything, Use only provided data.
+    - Description field should be short bullets strings.
+    - The response must start with {{ and end with }}
+"""
+    
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input = prompt
+    )
+
+    response_data = json.loads(response.output_text)
+    conclusion = response_data.get("conclusion", {})
+
+    return conclusion

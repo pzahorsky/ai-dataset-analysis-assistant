@@ -94,7 +94,7 @@ def insights_tab(insights):
 
     with insights:
 
-        sgap, plot, insight, egap = st.columns([0.5,4,4,0.5])
+        plot, insight= st.columns([1,1])
 
         with plot:
             st.subheader("Plot header")

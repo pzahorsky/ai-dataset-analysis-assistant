@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import re
+import matplotlib.pyplot as plt
+import matplotx as mpx
 
-from .llm_interface import inspect_dataset, create_analysis_plan 
+from .llm_interface import inspect_dataset, create_analysis_plan, conclude_insights
 
 # ---> DATA Loader
 
@@ -219,11 +221,38 @@ class AnalysisEngine:
     
 class InsightsEngine:
 
-    def run_insights(self, data: pd.DataFrame, chart: dict):
+    def run_insights(self, data: pd.DataFrame, chart: dict, 
+                     question: str, plan: dict):
 
         data = data.copy()
 
         chart_type = chart.get("chart_type", "")
         x = chart.get("x", "")
         y = chart.get("y", "")
+
+        debug_text = (
+            f"chart type: {chart_type}\n"
+            f"x: {x}\n"
+            f"y: {y}\n"
+        )
+
+        fig = self.plot(data, chart_type, x, y)
+
+        insights = conclude_insights(question, plan, chart, data)
+
+        return debug_text, fig, insights
+    
+    def plot(self, data, chart_type, x, y):
+
+        plt.style.use(mpx.styles.nord)
+
+        fig,ax = plt.subplots()
+
+        if chart_type == "line":
+            ax.plot(data[x], data[y])
+
+        ax.set_xlabel(x)
+        ax.set_ylabel(y)
+
+        return fig
 

@@ -25,6 +25,7 @@ jsonschema-specifications==2025.9.1
 kiwisolver==1.5.0
 MarkupSafe==3.0.3
 matplotlib==3.10.8
+matplotx==0.3.10
 narwhals==2.18.0
 numpy==2.4.3
 openai==2.26.0

@@ -9,9 +9,10 @@ import ui.sidebar as sidebar
 import ui.layout as layout
 
 analysis_engine = data_engine.AnalysisEngine()
+insights_engine = data_engine.InsightsEngine()
 
 # --- DATA ---> UPLOAD & LOAD
-
+data = None
 data_raw = None
 data_uploaded = sidebar.data_upload()
 
@@ -28,6 +29,7 @@ viewer, analysis, view, insights = layout.init_layout(
 
 data_cleaned = None
 chart = None
+
 
 if viewer is not None:
 
@@ -65,7 +67,7 @@ if analysis is not None:
    
    run, query, plan_box, result_box = layout.analysis_tab(analysis)
    if run and query:
-      plan, description, chart = data_engine.run_analysis(data_cleaned, query)
+      plan, description, chart, question = data_engine.run_analysis(data_cleaned, query)
       
       description_text = "\n".join(description.values())
       data = analysis_engine.run_analysis(data_cleaned, plan)
@@ -77,12 +79,16 @@ if analysis is not None:
          st.write(data)
 
 if insights is not None:
+
+   if data is not None:
    
-   plot_box, insights_box = layout.insights_tab(insights)
+      plot_box, insights_box = layout.insights_tab(insights)
 
-   with plot_box:
-      st.markdown(chart)
+      charted, fig, insights = insights_engine.run_insights(data, chart, question, plan,)
 
-   with insights_box:
-      st.markdown("Here comes the Insights from LLM")
+      with plot_box:
+         st.pyplot(fig)
+
+      with insights_box:
+         st.markdown(insights)
 
