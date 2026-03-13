@@ -8,6 +8,8 @@ import ai_dataset_assistant.llm_interface as llm
 import ui.sidebar as sidebar
 import ui.layout as layout
 
+analysis_engine = data_engine.AnalysisEngine()
+
 # --- DATA ---> UPLOAD & LOAD
 
 data_raw = None
@@ -33,7 +35,7 @@ if viewer is not None:
 
    data_clean_nan = data_engine.data_clean_nan(data_raw)
    info = data_engine.data_info(data_clean_nan)
-   input_for_llm = data_engine.identify_data(data_raw)
+   input_for_llm = data_engine.identify_data(data_clean_nan)
 
    if st.session_state.llm_feedback is None:
       with st.sidebar.spinner("Inspecting dataset structure..."):
@@ -50,7 +52,7 @@ if viewer is not None:
       if llm_feedback.get("combined_metadata_column"):
          combined_index = llm_feedback["metadata_column_index"]
          multicol = data_raw.columns[combined_index]
-         data_cleaned = data_engine.multicol_separator(data_raw, multicol)
+         data_cleaned = data_engine.multicol_separator(data_clean_nan, multicol)
 
          if llm_feedback["dataset_format"] in ["wide_time_series", "combined_dimension_wide"]:
             time_colls = data_engine.time_cols_detector(data_cleaned.columns)
@@ -64,6 +66,11 @@ if analysis is not None:
       plan, description = data_engine.run_analysis(data_cleaned, query)
       
       description_text = "\n".join(description.values())
+      data = analysis_engine.run_analysis(data_cleaned, plan)
+      
       with plan_box:
          st.markdown(description_text)
+
+      with result_box:
+         st.write(data)
 

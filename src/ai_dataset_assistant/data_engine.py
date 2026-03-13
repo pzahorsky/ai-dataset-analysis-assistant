@@ -107,6 +107,8 @@ def multicol_separator(data, multicol):
 
     return data
 
+# ---> Time columns detector
+
 def time_cols_detector(columns):
     
     patterns = [
@@ -126,6 +128,7 @@ def time_cols_detector(columns):
 
     return time_cols
 
+# ---> DATA Fromat Transformation Wide ---> Tiny
 def reshape_from_wide(data, time_cols):
 
     data = data.copy()
@@ -164,3 +167,52 @@ def execute_analysis(data, query):
         return data.max(numeric_only=True)
 
     return None
+
+class AnalysisEngine:
+
+    def run_analysis(self, data: pd.DataFrame, plan: dict):
+
+        data = data.copy()
+
+        filters = plan.get("filters", {})
+        group_by = plan.get("group_by", [])
+        metric = plan.get("metric", "")
+        operation = plan.get("operation", "")
+
+        data = self.data_filter(data,filters)
+        data = self.group_aggregate(data, group_by, metric, operation)
+
+        debug_text = (
+            f"filters: {filters}\n"
+            f"group_by: {group_by}\n"
+            f"metric: {metric}\n"
+            f"operation: {operation}"
+        )
+
+        return data
+    
+    def data_filter(self, data: pd.DataFrame, filters: dict):
+
+        for col, value in filters.items():
+
+            if isinstance(value, list):
+                data = data[data[col].isin(value)]
+            else:
+                data = data[data[col] == value]
+
+        return data
+    
+    def group_aggregate(self, data: pd.DataFrame, group_by: list,
+                         metric: str, operation: str):
+        
+        data[metric] = pd.to_numeric(data[metric], errors="coerce")
+
+        data = (
+            data.groupby(group_by)[metric]
+            .agg(operation)
+            .reset_index()
+        )
+
+        data = data.dropna(subset=[metric])
+
+        return data

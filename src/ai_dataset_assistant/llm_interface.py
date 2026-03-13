@@ -58,6 +58,14 @@ def create_analysis_plan(data, query):
     
     columns = ", ".join(data.columns)
 
+    category_columns = data.select_dtypes(include=["object", "category"]).columns
+
+    unique_columns = {}
+
+    for col in category_columns:
+        uniques = data[col].dropna().unique()[:10].tolist()
+        unique_columns[col] = uniques
+
     prompt = f"""
 
     You are the data analyst planer.
@@ -69,6 +77,9 @@ def create_analysis_plan(data, query):
 
     Dataset columns:
     {columns}
+    
+    Unique column values:
+    {unique_columns}
 
     Return very short analysis plan strictly as JSON. 
     Return explenations strictly inside JSON..
@@ -94,7 +105,7 @@ def create_analysis_plan(data, query):
     - "filters" should contain only filtering conditions according to question.
     - "group_by" should contain columns used for aggregation or comparison.
     - "metric" should describe what value should be measured(f.e. price, amount, ...)
-    - "operation" should describe analytical action (f.e. sum, mean, avg, ...) 
+    - "operation" should describe analytical action. (Allowed agg functions: mean, sum, count, min, max, median, std) 
     - Do not invent anything, stick to the dataset columns.
     - Description field should be short bullets strings.
     - Make output usable for both backend and frontend.
