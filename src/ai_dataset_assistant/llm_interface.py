@@ -71,7 +71,7 @@ def create_analysis_plan(data, query):
     You are the data analyst planer.
     
     Your tasks is to translate user question into a structured analysis plan
-    that can be executed using pandas.
+    that can be executed using pandas and assume variables for plotting.
 
     User question:{query}
 
@@ -82,7 +82,8 @@ def create_analysis_plan(data, query):
     {unique_columns}
 
     Return very short analysis plan strictly as JSON. 
-    Return explenations strictly inside JSON..
+    Return explenations strictly inside JSON.
+    Return plot data strictly in JSON.
 
     {{
     "plan": {{
@@ -96,6 +97,11 @@ def create_analysis_plan(data, query):
         "group_by": "- ",
         "metric": "- ",
         "operation": "- "
+        }}
+    "plot": {{
+        "chart_type": "",
+        "x": "",
+        "y": ""
         }}
     }}
 
@@ -120,5 +126,6 @@ def create_analysis_plan(data, query):
     response_data = json.loads(response.output_text)
     plan = response_data.get("plan", {})
     description = response_data.get("ui_description", {})
+    chart = response_data.get("plot", {})
 
-    return plan, description
+    return plan, description, chart

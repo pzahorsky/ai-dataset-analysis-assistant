@@ -21,12 +21,13 @@ if data_uploaded:
     except ValueError as e:
        st.error(str(e))
 
-viewer, analysis, view = layout.init_layout(
+viewer, analysis, view, insights = layout.init_layout(
                          has_data = data_raw is not None
 
 )
 
 data_cleaned = None
+chart = None
 
 if viewer is not None:
 
@@ -61,9 +62,10 @@ if viewer is not None:
       layout.data_viewer(viewer, data_raw, data_cleaned)
 
 if analysis is not None:
+   
    run, query, plan_box, result_box = layout.analysis_tab(analysis)
    if run and query:
-      plan, description = data_engine.run_analysis(data_cleaned, query)
+      plan, description, chart = data_engine.run_analysis(data_cleaned, query)
       
       description_text = "\n".join(description.values())
       data = analysis_engine.run_analysis(data_cleaned, plan)
@@ -73,4 +75,14 @@ if analysis is not None:
 
       with result_box:
          st.write(data)
+
+if insights is not None:
+   
+   plot_box, insights_box = layout.insights_tab(insights)
+
+   with plot_box:
+      st.markdown(chart)
+
+   with insights_box:
+      st.markdown("Here comes the Insights from LLM")
 

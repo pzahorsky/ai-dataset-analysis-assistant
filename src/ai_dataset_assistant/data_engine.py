@@ -216,3 +216,14 @@ class AnalysisEngine:
         data = data.dropna(subset=[metric])
 
         return data
+    
+class InsightsEngine:
+
+    def run_insights(self, data: pd.DataFrame, chart: dict):
+
+        data = data.copy()
+
+        chart_type = chart.get("chart_type", "")
+        x = chart.get("x", "")
+        y = chart.get("y", "")
+

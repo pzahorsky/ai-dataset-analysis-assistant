@@ -12,14 +12,15 @@ def init_layout(
     if has_data:
         tab_names.append("📑 Data Viewer")
         tab_names.append("🧠 Analysis")
+        tab_names.append("💡 Insights")
 
     if not tab_names:
-        return None, None, view
+        return None, None, view, None
     
     created_tabs = st.tabs(tab_names)
 
     if not has_data:
-        viewer, analysis = None, None
+        viewer, analysis, insights = None, None, None
 
     tab_num = 0
     if has_data:
@@ -30,7 +31,11 @@ def init_layout(
         analysis = created_tabs[tab_num]
         tab_num += 1
 
-    return viewer, analysis, view
+    if has_data:
+        insights = created_tabs[tab_num]
+        tab_num += 1
+
+    return viewer, analysis, view, insights
 
 # ---> Data Viewer
  
@@ -84,6 +89,22 @@ def analysis_tab(analysis):
             result_placeholder = st.empty()
 
         return run, query.strip(), plan_placeholder, result_placeholder
+    
+def insights_tab(insights):
+
+    with insights:
+
+        sgap, plot, insight, egap = st.columns([0.5,4,4,0.5])
+
+        with plot:
+            st.subheader("Plot header")
+            plot_placeholder = st.empty()
+
+        with insight:
+            st.subheader("Insights header")
+            insight_placeholder = st.empty()
+
+        return plot_placeholder, insight_placeholder
 
     
 
