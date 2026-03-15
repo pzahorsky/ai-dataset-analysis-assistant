@@ -11,7 +11,7 @@ def init_layout(
 
     if has_data:
         tab_names.append("📑 Data Viewer")
-        tab_names.append("🧠 Analysis")
+        tab_names.append("🧠 Analysis Plan")
         tab_names.append("💡 Insights")
 
     if not tab_names:
@@ -86,7 +86,7 @@ def analysis_tab(analysis):
             st.subheader("Analysis Plan")
             plan_placeholder = st.empty()
         with result:
-            st.subheader("Result")
+            st.subheader("Aggregated Data")
             result_placeholder = st.empty()
 
         return run, query.strip(), plan_placeholder, result_placeholder
@@ -95,17 +95,24 @@ def insights_tab(insights):
 
     with insights:
 
-        plot, insight= st.columns([1,1])
+        plot, gap, insight= st.columns([5,1,5])
 
         with plot:
-            st.subheader("Plot header")
+            st.subheader("Chart")
             plot_placeholder = st.empty()
 
         with insight:
-            st.subheader("Insights header")
+            st.subheader("Insights")
             insight_placeholder = st.empty()
 
-        return plot_placeholder, insight_placeholder
+            st.markdown("---")
+
+            gapl, export, gapr = st.columns([3,3,3])
+
+            with export:
+                export_placeholder = st.button("Export Results")
+
+        return plot_placeholder, insight_placeholder, export_placeholder
 
     
 
