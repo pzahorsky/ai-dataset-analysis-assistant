@@ -30,11 +30,14 @@ viewer, analysis, view, insights = layout.init_layout(
 data_cleaned = None
 chart = None
 
+if "llm_feedback" not in st.session_state:
+        st.session_state.llm_feedback = None
+
+if data_uploaded is None:
+   st.session_state.llm_feedback = None
+
 
 if viewer is not None:
-
-   if "llm_feedback" not in st.session_state:
-        st.session_state.llm_feedback = None
 
    data_clean_nan = data_engine.data_clean_nan(data_raw)
    info = data_engine.data_info(data_clean_nan)

@@ -9,7 +9,7 @@ def data_info(data, info: dict, structure: dict):
 
     st.sidebar.write(f"Rows: {info["rows"]}")
     st.sidebar.write(f"Columns: {info["columns"]}")
-    st.sidebar.write(f"Missing Values: {info["missing"]}")
+    st.sidebar.write(f"Missing: {info["missing"]:.2f} %")
     st.sidebar.write(f"Numeric Columns: {info["numeric_columns"]}")
     
     st.sidebar.divider()

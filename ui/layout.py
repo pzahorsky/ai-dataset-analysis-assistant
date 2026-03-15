@@ -73,7 +73,8 @@ def analysis_tab(analysis):
     
     with analysis:
         st.subheader("Describe the analysis you want to perform.")
-        query = st.text_area("", label_visibility="collapsed")
+        query = st.text_area("Place for Analysis Plan"
+                             , label_visibility="collapsed")
 
         run = st.button("Run Analysis")
 

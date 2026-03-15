@@ -50,7 +50,10 @@ def data_clean_nan(data: pd.DataFrame) -> pd.DataFrame:
     data = data.replace({":": np.nan, "NA": np.nan, "N/A": np.nan})
 
     for col in data.select_dtypes(include="object"):
-        data[col] = pd.to_numeric(data[col], errors="ignore")
+        try:
+            data[col] = pd.to_numeric(data[col])
+        except (ValueError, TypeError):
+            pass
 
     return data
 
@@ -75,7 +78,7 @@ def data_info(data: pd.DataFrame) -> dict:
     return {
         "rows": data.shape[0],
         "columns": data.shape[1],
-        "missing": int(data.isna().sum().sum()),
+        "missing": ((int(data.isna().sum().sum())) / len(data)),
         "numeric_columns": int(data.select_dtypes(include="number").shape[1]),
     }
 
