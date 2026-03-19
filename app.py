@@ -41,7 +41,7 @@ if "insights_result" not in st.session_state:
 if data_uploaded is None:
    st.session_state.llm_feedback = None
 
-
+# --- VIEWER
 if viewer is not None:
 
    data_clean_nan = data_engine.data_clean_nan(data_raw)
