@@ -101,7 +101,7 @@ The project is modular and designed for extensibility:
 ![Analysis Plan Generated](assets/4_AnalysisPlan_agg.png)
 
 ### 5. Insights & Visualization
-![Insights](assets/5_Insights_chart_insights.png)
+![Insights](assets/5_Insights_chartinsights.png)
 
 ### 6. PDF Export
 ![PDF Export](assets/6_PDF_export.png)
