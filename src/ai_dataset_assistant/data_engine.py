@@ -3,6 +3,11 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 import matplotx as mpx
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+import io
 
 from .llm_interface import inspect_dataset, create_analysis_plan, conclude_insights
 
@@ -235,18 +240,11 @@ class InsightsEngine:
 
         other_cols = [col for col in data.columns if col not in [x,y]]
 
-        debug_text = (
-            f"chart type: {chart_type}\n"
-            f"x: {x}\n"
-            f"y: {y}\n"
-            f"other_cols: {other_cols}"
-        )
-
         fig, group_col = self.plot(data, chart_type, x, y, other_cols)
 
         insights = conclude_insights(question, plan, chart, data, group_col)
 
-        return debug_text, fig, insights
+        return fig, insights
     
     def plot(self, data, chart_type, x, y, other_cols):
 
@@ -276,3 +274,65 @@ class InsightsEngine:
 
         return fig, group_col
 
+class ReportEngine:
+
+    def build_pdf(self, fig, title, plan, conclusion):
+        buffer = io.BytesIO()
+
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            leftMargin=20 * mm,
+            rightMargin=20 * mm,
+            topMargin=20 * mm,
+            bottomMargin=20 * mm,
+        )
+
+        styles = getSampleStyleSheet()
+        story = []
+
+        plan_text = self.to_paragraph_text(plan)
+        conclusion_text = self.to_paragraph_text(conclusion)
+
+        story.append(Paragraph(str(title), styles["Title"]))
+
+        story.append(Paragraph("Analysis Plan", styles["Heading2"]))
+        story.append(Spacer(1, 2 * mm))
+
+        plan_items = plan_text.split("-")
+        plan_items = [item.strip() for item in plan_items if item.strip()]
+
+        for item in plan_items:
+            story.append(Paragraph(f"• {item}", styles["BodyText"]))
+            story.append(Spacer(1, 1.5 * mm))
+        story.append(Spacer(1, 8 * mm))
+
+        img_buffer = self.fig_to_buffer(fig)
+        story.append(Image(img_buffer, width=170 * mm, height=95 * mm))
+        story.append(Spacer(1, 6 * mm))
+
+        clean_text = " ".join(conclusion_text.split())
+        story.append(Paragraph(clean_text, styles["BodyText"]))
+        story.append(Spacer(1, 8 * mm))
+
+        doc.build(story)
+        buffer.seek(0)
+
+        return buffer
+
+    def fig_to_buffer(self, fig, dpi=300):
+        buffer = io.BytesIO()
+        fig.savefig(buffer, format="png", dpi=dpi, bbox_inches="tight", facecolor="white")
+        buffer.seek(0)
+
+        return buffer
+
+    def to_paragraph_text(self, value):
+        if isinstance(value, str):
+            return value
+        if isinstance(value, list):
+            return "<br/>".join(str(item) for item in value)
+        if isinstance(value, dict):
+            return "<br/>".join(f"{k}: {v}" for k, v in value.items())
+        
+        return str(value)

@@ -91,7 +91,7 @@ def analysis_tab(analysis):
 
         return run, query.strip(), plan_placeholder, result_placeholder
     
-def insights_tab(insights, question):
+def insights_tab(insights, question, pdf):
 
     with insights:
 
@@ -110,9 +110,15 @@ def insights_tab(insights, question):
             gapl, export, gapr = st.columns([3,3,3])
 
             with export:
-                export_placeholder = st.button("Export Results")
+                if pdf is not None:
+                    st.download_button(
+                        label="Download PDF",
+                        data=pdf,
+                        file_name="analysis_report.pdf",
+                        mime="application/pdf"
+                    )
 
-        return plot_placeholder, insight_placeholder, export_placeholder
+        return plot_placeholder, insight_placeholder
 
     
 

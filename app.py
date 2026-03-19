@@ -10,6 +10,7 @@ import ui.layout as layout
 
 analysis_engine = data_engine.AnalysisEngine()
 insights_engine = data_engine.InsightsEngine()
+report_engine = data_engine.ReportEngine()
 
 # --- DATA ---> UPLOAD & LOAD
 data = None
@@ -31,7 +32,11 @@ data_cleaned = None
 chart = None
 
 if "llm_feedback" not in st.session_state:
-        st.session_state.llm_feedback = None
+   st.session_state.llm_feedback = None
+if "analysis_result" not in st.session_state:
+   st.session_state.analysis_result = None
+if "insights_result" not in st.session_state:
+   st.session_state.insights_result = None
 
 if data_uploaded is None:
    st.session_state.llm_feedback = None
@@ -70,28 +75,71 @@ if analysis is not None:
    
    run, query, plan_box, result_box = layout.analysis_tab(analysis)
    if run and query:
+      st.session_state.insights_result = None
       plan, description, chart, question = data_engine.run_analysis(data_cleaned, query)
       
       description_text = "\n".join(description.values())
       data = analysis_engine.run_analysis(data_cleaned, plan)
-      
-      with plan_box:
-         st.markdown(description_text)
 
-      with result_box:
-         st.write(data)
+      st.session_state.analysis_result = {
+            "plan": plan,
+            "chart": chart,
+            "question": question,
+            "data": data,
+            "description_text": description_text
+      }
+      
+      if st.session_state.analysis_result:
+         with plan_box:
+            st.markdown(description_text)
+
+         with result_box:
+            st.write(data)
 
 if insights is not None:
 
-   if data is not None:
-   
-      plot_box, insights_box, export = layout.insights_tab(insights, question)
+   if st.session_state.analysis_result:
 
-      charted, fig, insights = insights_engine.run_insights(data, chart, question, plan,)
+      ar = st.session_state.analysis_result
 
-      with plot_box:
-         st.pyplot(fig)
+      if st.session_state.insights_result is None:
 
-      with insights_box:
-         st.markdown(insights)
+         fig, conclusion = insights_engine.run_insights(
+            ar["data"],
+            ar["chart"], 
+            ar["question"],
+            ar["plan"]
+         )
+
+         pdf = report_engine.build_pdf(
+                        fig,
+                        ar["question"],
+                        ar["description_text"],
+                        conclusion
+               )
+         
+         st.session_state.insights_result = {
+               "fig": fig,
+               "conclusion": conclusion,
+               "pdf": pdf
+            }
+
+      ir = st.session_state.insights_result
+
+      if ir is not None and "pdf" in ir:
+         plot_box, insights_box = layout.insights_tab(insights, 
+                                                           ar["question"],
+                                                           ir["pdf"]
+         )
+
+         with plot_box:
+            st.pyplot(ir["fig"])
+
+         with insights_box:
+            st.markdown(ir["conclusion"])
+
+
+      
+
+      
 
