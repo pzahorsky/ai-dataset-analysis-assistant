@@ -130,13 +130,16 @@ def create_analysis_plan(data, query):
 
     return plan, description, chart, query
 
-def conclude_insights(question, plan, chart, data):
+def conclude_insights(question, plan, chart, data, group_col):
     
+    unique_groups = list(data[group_col].unique()) if group_col else []
+
     data_for_prompt = {
         "question": question,
         "analysis_plan": plan,
         "chart_data": chart,
-        "data": data.head(20).to_dict(orient="records")
+        "group_col": unique_groups,
+        "data": data
     }
 
     prompt = f"""
@@ -153,6 +156,7 @@ def conclude_insights(question, plan, chart, data):
     "analysis plan" - for processing the data and preparing analysis
     "chart_data" - used for visualisation of the results
     "data" - head() of data after cleaning
+    "group_col" - is used to split data into multiple groups relevant to question
 
     Create conclusion from the given sources strictly in JSON format.
 

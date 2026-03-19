@@ -85,7 +85,7 @@ if insights is not None:
 
    if data is not None:
    
-      plot_box, insights_box, export = layout.insights_tab(insights)
+      plot_box, insights_box, export = layout.insights_tab(insights, question)
 
       charted, fig, insights = insights_engine.run_insights(data, chart, question, plan,)
 

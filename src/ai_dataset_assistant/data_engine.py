@@ -233,29 +233,46 @@ class InsightsEngine:
         x = chart.get("x", "")
         y = chart.get("y", "")
 
+        other_cols = [col for col in data.columns if col not in [x,y]]
+
         debug_text = (
             f"chart type: {chart_type}\n"
             f"x: {x}\n"
             f"y: {y}\n"
+            f"other_cols: {other_cols}"
         )
 
-        fig = self.plot(data, chart_type, x, y)
+        fig, group_col = self.plot(data, chart_type, x, y, other_cols)
 
-        insights = conclude_insights(question, plan, chart, data)
+        insights = conclude_insights(question, plan, chart, data, group_col)
 
         return debug_text, fig, insights
     
-    def plot(self, data, chart_type, x, y):
+    def plot(self, data, chart_type, x, y, other_cols):
 
         plt.style.use(mpx.styles.nord)
-
         fig,ax = plt.subplots()
 
+        group_col = None
+        for col in other_cols:
+            if data[col].nunique() > 1 and data[col].dtype == "object":
+                group_col = col
+                break
+
         if chart_type == "line":
-            ax.plot(data[x], data[y])
+            if group_col:
+                for unique in data[group_col].unique():
+                    data_filt = data[data[group_col] == unique].sort_values(by=x)
+                    ax.plot(data_filt[x], data_filt[y], label=str(unique))
+                ax.legend()
+            else:
+                data = data.sort_values(by=x)
+                ax.plot(data[x], data[y])
 
         ax.set_xlabel(x)
+        ax.set_xticks(ax.get_xticks()[::2])
         ax.set_ylabel(y)
+        ax.tick_params(axis="x", labelrotation=60)
 
-        return fig
+        return fig, group_col
 

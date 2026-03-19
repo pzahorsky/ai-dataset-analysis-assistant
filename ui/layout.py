@@ -91,14 +91,14 @@ def analysis_tab(analysis):
 
         return run, query.strip(), plan_placeholder, result_placeholder
     
-def insights_tab(insights):
+def insights_tab(insights, question):
 
     with insights:
 
         plot, gap, insight= st.columns([5,1,5])
 
         with plot:
-            st.subheader("Chart")
+            st.subheader(question)
             plot_placeholder = st.empty()
 
         with insight:
